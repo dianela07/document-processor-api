@@ -42,6 +42,12 @@ class Settings(BaseSettings):
     # Configuración de procesamiento
     MAX_FILE_SIZE_MB: int = 10
     SUPPORTED_FORMATS: list[str] = [".pdf", ".csv", ".xlsx", ".xls", ".txt", ".log"]
+    MAX_TEXT_LENGTH_FOR_LLM: int = 4000  # Máximo caracteres enviados al LLM
+    MAX_REPORT_RECORDS: int = 1000  # Máximo registros en reportes
+    
+    # Configuración LLM
+    LLM_MAX_TOKENS: int = 1000
+    LLM_TEMPERATURE: float = 0.1
     
     # Logging
     LOG_LEVEL: str = "INFO"

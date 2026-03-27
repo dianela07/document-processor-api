@@ -7,6 +7,8 @@ from typing import Optional
 import logging
 import json
 
+from src.core.config import settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -72,8 +74,8 @@ class GroqProvider(BaseLLMProvider):
             response = client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=1000,
-                temperature=0.1
+                max_tokens=settings.LLM_MAX_TOKENS,
+                temperature=settings.LLM_TEMPERATURE
             )
             
             return response.choices[0].message.content
@@ -138,7 +140,7 @@ class AzureOpenAIProvider(BaseLLMProvider):
             response = client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=1000
+                max_tokens=settings.LLM_MAX_TOKENS
             )
             
             return response.choices[0].message.content
