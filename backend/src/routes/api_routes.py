@@ -9,7 +9,7 @@ import io
 import logging
 
 from src.processor.processor import DocumentProcessor, ProcessorSettings
-from src.database.db import ProcessesDB
+from src.database.db import ProcessesDB, FieldsDB
 from src.reports.generator import ReportGenerator
 from src.models.schemas import ExtractionField, APIResponse, ReportConfig
 from src.llm.providers import get_llm_provider
@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["Document Processing"])
 process_settings = ProcessorSettings()
 db = ProcessesDB()
+fields_db = FieldsDB()
 report_generator = ReportGenerator()
 
 # Inicializar LLM provider
@@ -34,6 +35,19 @@ llm_provider = get_llm_provider(
 processor = DocumentProcessor(process_settings, llm_provider)
 
 
+# Sync fields from DB to ProcessorSettings on startup
+def _sync_fields_from_db():
+    """Load fields from database into ProcessorSettings."""
+    process_settings.clear_fields()
+    for field in fields_db.get_all():
+        try:
+            process_settings.create_field(field)
+        except ValueError:
+            pass  # Field already exists
+
+_sync_fields_from_db()
+
+
 # =====================
 # ENDPOINTS DE PROCESOS
 # =====================
@@ -45,17 +59,14 @@ async def list_processes(
 ):
     """Lista todos los procesos realizados."""
     try:
-        processes = db.load_processes()
-        process_list = list(processes.values())
-        
-        # Paginación
-        paginated = process_list[offset:offset + limit]
+        process_list = db.get_all_processes(limit=limit, offset=offset)
+        total = db.get_total_count()
         
         return APIResponse.ok(
-            message=f"Se encontraron {len(process_list)} procesos",
+            message=f"Se encontraron {total} procesos",
             data={
-                "processes": paginated,
-                "total": len(process_list),
+                "processes": process_list,
+                "total": total,
                 "limit": limit,
                 "offset": offset
             }
@@ -68,12 +79,10 @@ async def list_processes(
 @router.get("/processes/{process_id}", response_model=APIResponse)
 async def get_process(process_id: str):
     """Obtiene un proceso específico por ID."""
-    processes = db.load_processes()
+    process = db.get_process(process_id)
     
-    # Buscar por ID
-    for timestamp, process in processes.items():
-        if process.get('id') == process_id:
-            return APIResponse.ok(message="Proceso encontrado", data=process)
+    if process:
+        return APIResponse.ok(message="Proceso encontrado", data=process)
     
     raise HTTPException(status_code=404, detail="Proceso no encontrado")
 
@@ -139,7 +148,7 @@ async def upload_file(file: UploadFile = File(...)):
 @router.get("/fields", response_model=APIResponse)
 async def list_fields():
     """Lista todos los campos de extracción configurados."""
-    fields = process_settings.get_fields()
+    fields = fields_db.get_all()
     return APIResponse.ok(
         message=f"{len(fields)} campos configurados",
         data={"fields": fields}
@@ -150,10 +159,16 @@ async def list_fields():
 async def create_field(field: ExtractionField):
     """Crea un nuevo campo de extracción."""
     try:
-        process_settings.create_field(field.model_dump())
+        # Guardar en base de datos
+        created = fields_db.create(field.model_dump())
+        # Sincronizar con ProcessorSettings
+        try:
+            process_settings.create_field(created)
+        except ValueError:
+            pass  # Field already in memory
         return APIResponse.ok(
             message=f"Campo '{field.name}' creado exitosamente",
-            data=field.model_dump()
+            data=created
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -162,7 +177,8 @@ async def create_field(field: ExtractionField):
 @router.delete("/fields/{field_name}", response_model=APIResponse)
 async def delete_field(field_name: str):
     """Elimina un campo de extracción."""
-    if process_settings.delete_field(field_name):
+    if fields_db.delete(field_name):
+        process_settings.delete_field(field_name)
         return APIResponse.ok(message=f"Campo '{field_name}' eliminado")
     raise HTTPException(status_code=404, detail="Campo no encontrado")
 
@@ -170,7 +186,7 @@ async def delete_field(field_name: str):
 @router.delete("/fields", response_model=APIResponse)
 async def delete_all_fields():
     """Elimina todos los campos de extracción configurados."""
-    count = len(process_settings.get_fields())
+    count = fields_db.delete_all()
     process_settings.clear_fields()
     return APIResponse.ok(message=f"{count} campos eliminados")
 
@@ -178,7 +194,8 @@ async def delete_all_fields():
 @router.put("/fields/{field_name}", response_model=APIResponse)
 async def update_field(field_name: str, updates: dict):
     """Actualiza un campo de extracción."""
-    if process_settings.update_field(field_name, updates):
+    if fields_db.update(field_name, updates):
+        process_settings.update_field(field_name, updates)
         return APIResponse.ok(message=f"Campo '{field_name}' actualizado")
     raise HTTPException(status_code=404, detail="Campo no encontrado")
 
@@ -195,8 +212,7 @@ async def generate_report(config: ReportConfig):
     Formatos: excel, csv, json
     """
     try:
-        processes = db.load_processes()
-        data = list(processes.values())
+        data = db.get_all_processes(limit=1000)  # Get all for report
         
         # Filtrar por rango de fechas si se especifica
         if config.date_range_start or config.date_range_end:
