@@ -1,0 +1,17 @@
+# Render Blueprint - Document Processor API
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: document-processor-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false  # Se configura manualmente en Render Dashboard
