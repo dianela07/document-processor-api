@@ -1,0 +1,43 @@
+# ===================================
+# Document Processor API - Dependencias
+# ===================================
+
+# Framework web - Backend
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+
+# Framework web - Frontend
+streamlit>=1.31.0
+
+# Validación y configuración
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-dotenv>=1.0.0
+
+# Base de datos y archivos
+python-multipart>=0.0.6
+
+# Extracción de documentos
+PyPDF2>=3.0.0
+openpyxl>=3.1.2
+
+# Proveedores LLM
+openai>=1.10.0       # Para Groq y Azure OpenAI
+httpx>=0.26.0        # Para Ollama
+
+# Cliente HTTP
+requests>=2.31.0
+
+# Procesamiento de datos
+pandas>=2.1.0
+
+# Utilidades (procesor.py legacy)
+langchain-core>=0.1.0
+
+# ===================================
+# Dependencias de desarrollo (opcional)
+# ===================================
+# pytest>=8.0.0
+# pytest-asyncio>=0.23.0
+# black>=24.1.0
+# ruff>=0.1.0
