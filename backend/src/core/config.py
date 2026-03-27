@@ -19,8 +19,8 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     
-    # Base de datos
-    DATABASE_PATH: str = "data/processes.json"
+    # Base de datos SQLite
+    DATABASE_URL: str = "sqlite:///data/document_processor.db"
     
     # LLM Provider: "groq", "ollama", "azure", "none"
     LLM_PROVIDER: str = "groq"
