@@ -130,7 +130,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Configuración
-API_URL = "http://localhost:8000/api/v1"
+import os
+API_URL = os.getenv("API_URL", "http://localhost:8000/api/v1")
 
 
 def get_api_info():
@@ -138,7 +139,7 @@ def get_api_info():
     try:
         response = requests.get(f"{API_URL}/info", timeout=5)
         return response.json() if response.ok else None
-    except:
+    except requests.exceptions.RequestException:
         return None
 
 
@@ -157,7 +158,7 @@ def get_processes():
     try:
         response = requests.get(f"{API_URL}/processes", timeout=10)
         return response.json() if response.ok else {"data": {"processes": []}}
-    except:
+    except requests.exceptions.RequestException:
         return {"data": {"processes": []}}
 
 
@@ -166,7 +167,7 @@ def get_fields():
     try:
         response = requests.get(f"{API_URL}/fields", timeout=5)
         return response.json() if response.ok else {"data": {"fields": []}}
-    except:
+    except requests.exceptions.RequestException:
         return {"data": {"fields": []}}
 
 
@@ -206,7 +207,7 @@ def generate_report(format_type="excel"):
             timeout=30
         )
         return response.content if response.ok else None
-    except:
+    except requests.exceptions.RequestException:
         return None
 
 

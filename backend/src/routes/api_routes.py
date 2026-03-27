@@ -4,7 +4,7 @@ Demuestra: Framework web, endpoints RESTful, manejo de archivos.
 """
 from fastapi import APIRouter, File, UploadFile, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from typing import Optional
+from datetime import datetime
 import io
 import logging
 
@@ -212,11 +212,10 @@ async def generate_report(config: ReportConfig):
     Formatos: excel, csv, json
     """
     try:
-        data = db.get_all_processes(limit=1000)  # Get all for report
+        data = db.get_all_processes(limit=settings.MAX_REPORT_RECORDS)
         
         # Filtrar por rango de fechas si se especifica
         if config.date_range_start or config.date_range_end:
-            from datetime import datetime
             filtered = []
             for proc in data:
                 proc_date = datetime.fromisoformat(proc.get('processed_at', ''))
