@@ -67,7 +67,8 @@ coverage.xml
 # ==================================
 logs/
 data/
-reports/
+# Reportes generados (no el módulo de código)
+/backend/reports/
 processes.json
 *.log
 
