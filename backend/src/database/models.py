@@ -3,10 +3,15 @@ SQLAlchemy models for the database.
 """
 from sqlalchemy import Column, String, DateTime, JSON, Text, Boolean, Integer
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 Base = declarative_base()
+
+
+def utc_now():
+    """Return current UTC time."""
+    return datetime.now(timezone.utc)
 
 
 class Process(Base):
@@ -20,7 +25,7 @@ class Process(Base):
     extracted_data = Column(JSON, default=dict)
     metadata = Column(JSON, default=dict)
     error_message = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     processed_at = Column(DateTime, nullable=True)
     
     def to_dict(self) -> dict:

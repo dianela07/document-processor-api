@@ -4,11 +4,11 @@ Provides persistent storage for document processing records.
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 import os
 
-from src.database.models import Base, Process, ExtractionFieldModel
+from src.database.models import Base, Process, ExtractionFieldModel, utc_now
 from src.core.config import settings
 
 
@@ -33,12 +33,13 @@ def init_db():
 
 
 def get_db() -> Session:
-    """Get a database session."""
-    db = SessionLocal()
-    try:
-        return db
-    finally:
-        pass  # Session management handled by caller
+    """
+    Get a database session.
+    
+    Note: Caller is responsible for closing the session.
+    For FastAPI dependency injection, use with 'yield'.
+    """
+    return SessionLocal()
 
 
 class ProcessesDB:
@@ -49,16 +50,6 @@ class ProcessesDB:
     
     def _get_session(self) -> Session:
         return SessionLocal()
-    
-    def load_processes(self, limit: int = 100, offset: int = 0) -> dict:
-        """Load all processes as a dictionary (for backward compatibility)."""
-        with self._get_session() as session:
-            processes = session.query(Process)\
-                .order_by(Process.created_at.desc())\
-                .offset(offset)\
-                .limit(limit)\
-                .all()
-            return {p.id: p.to_dict() for p in processes}
     
     def get_all_processes(self, limit: int = 100, offset: int = 0) -> List[dict]:
         """Get all processes as a list of dictionaries."""
@@ -86,8 +77,8 @@ class ProcessesDB:
                 extracted_data=response.get('extracted_data', {}),
                 metadata=response.get('metadata', {}),
                 error_message=response.get('error_message'),
-                processed_at=datetime.fromisoformat(response['processed_at']) 
-                    if response.get('processed_at') else datetime.utcnow()
+                processed_at=datetime.fromisoformat(response['processed_at'].replace('Z', '+00:00')) 
+                    if response.get('processed_at') else utc_now()
             )
             session.add(process)
             session.commit()

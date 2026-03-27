@@ -2,7 +2,7 @@
 Procesador principal de documentos.
 Integra extractor, LLM y generador de reportes.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 import logging
 import uuid
@@ -116,7 +116,7 @@ JSON:"""
         Returns:
             Diccionario con los datos extraídos y metadatos
         """
-        process_id = f"proc_{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:6]}"
+        process_id = f"proc_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:6]}"
         proc_logger = ProcessLogger(process_id)
         
         proc_logger.start(filename)
@@ -142,7 +142,7 @@ JSON:"""
             result = {
                 "id": process_id,
                 "filename": filename,
-                "processed_at": datetime.now().isoformat(),
+                "processed_at": datetime.now(timezone.utc).isoformat(),
                 "status": "completed",
                 "extracted_data": extracted_data,
                 "metadata": {
@@ -161,7 +161,7 @@ JSON:"""
             return {
                 "id": process_id,
                 "filename": filename,
-                "processed_at": datetime.now().isoformat(),
+                "processed_at": datetime.now(timezone.utc).isoformat(),
                 "status": "error",
                 "error": str(e),
                 "extracted_data": {},
@@ -177,7 +177,7 @@ JSON:"""
         ])
         
         # Limitar texto si es muy largo
-        max_chars = 4000
+        max_chars = settings.MAX_TEXT_LENGTH_FOR_LLM
         if len(text) > max_chars:
             text = text[:max_chars] + "\n...[texto truncado]..."
         
