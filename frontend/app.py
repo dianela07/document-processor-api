@@ -16,9 +16,26 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilos CSS personalizados
+# Estilos CSS personalizados + Iconos externos
 st.markdown("""
+<!-- Font Awesome & Material Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
 <style>
+    /* Icon helpers */
+    .fa, .fas, .far, .fab, .material-icons {
+        vertical-align: middle;
+    }
+    .icon-sm { font-size: 0.9rem; }
+    .icon-md { font-size: 1.1rem; }
+    .icon-lg { font-size: 1.4rem; }
+    .icon-primary { color: #4361ee; }
+    .icon-success { color: #198754; }
+    .icon-danger { color: #dc3545; }
+    .icon-warning { color: #ffc107; }
+    .icon-muted { color: #6c757d; }
+    
     /* Header principal */
     .app-header {
         display: flex;
@@ -200,23 +217,23 @@ def generate_report(format_type="excel"):
 # Header
 st.markdown('''
 <div class="app-header">
-    <div class="app-icon">◈</div>
+    <div class="app-icon"><i class="fas fa-file-alt"></i></div>
     <h1 class="main-header">Document Processor</h1>
 </div>
 <p class="sub-header">
-    Plataforma inteligente para <strong>extracción automática de datos</strong> desde documentos. 
+    <i class="fas fa-robot icon-sm icon-primary"></i> Plataforma inteligente para <strong>extracción automática de datos</strong> desde documentos. 
     Procesa archivos PDF, Excel, CSV y texto, extrayendo información estructurada de forma eficiente.
 </p>
 ''', unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
-    st.markdown("### ⚙ Configuración")
+    st.markdown('<h3><i class="fas fa-cog icon-sm icon-muted"></i> Configuración</h3>', unsafe_allow_html=True)
     
     # Verificar conexión con API
     api_info = get_api_info()
     if api_info and api_info.get("success"):
-        st.markdown('<span class="status-connected">● Conectado</span>', unsafe_allow_html=True)
+        st.markdown('<span class="status-connected"><i class="fas fa-circle icon-sm"></i> Conectado</span>', unsafe_allow_html=True)
         info = api_info.get("data", {})
         st.caption(f"Versión {info.get('version', 'N/A')} · {info.get('llm_provider', 'N/A').upper()}")
         
@@ -225,13 +242,13 @@ with st.sidebar:
         formats_display = ", ".join([f.upper() for f in formats])
         st.caption(f"Formatos: {formats_display}")
     else:
-        st.markdown('<span class="status-disconnected">● Desconectado</span>', unsafe_allow_html=True)
+        st.markdown('<span class="status-disconnected"><i class="fas fa-circle icon-sm"></i> Desconectado</span>', unsafe_allow_html=True)
         st.caption("Verifica que el backend esté corriendo en localhost:8000")
     
     st.divider()
     
     # Configuración de campos
-    st.markdown("### ☰ Campos de extracción")
+    st.markdown('<h3><i class="fas fa-list-check icon-sm icon-muted"></i> Campos de extracción</h3>', unsafe_allow_html=True)
     
     fields_response = get_fields()
     fields = fields_response.get("data", {}).get("fields", [])
@@ -280,13 +297,13 @@ with st.sidebar:
 
 
 # Tabs principales
-tab1, tab2, tab3 = st.tabs(["▷ Procesamiento", "▤ Historial", "▦ Reportes"])
+tab1, tab2, tab3 = st.tabs(["📤 Procesamiento", "📋 Historial", "📊 Reportes"])
 
 # ==================
 # TAB 1: SUBIR ARCHIVO
 # ==================
 with tab1:
-    st.markdown("### ▸ Procesar documento")
+    st.markdown('<h3><i class="fas fa-upload icon-md icon-primary"></i> Procesar documento</h3>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
     
@@ -303,8 +320,8 @@ with tab1:
             
             st.markdown(f"""
             <div class="info-card">
-                <strong>{uploaded_file.name}</strong><br>
-                <small style="color: #6c757d;">{size_label} · {uploaded_file.type}</small>
+                <i class="fas fa-file icon-md icon-primary"></i> <strong>{uploaded_file.name}</strong><br>
+                <small style="color: #6c757d;"><i class="fas fa-weight-hanging icon-sm"></i> {size_label} · {uploaded_file.type}</small>
             </div>
             """, unsafe_allow_html=True)
             
@@ -318,7 +335,7 @@ with tab1:
                     # Mostrar resultados
                     data = result.get("data", {})
                     
-                    st.markdown("#### ▹ Datos extraídos")
+                    st.markdown('<h4><i class="fas fa-table icon-sm icon-success"></i> Datos extraídos</h4>', unsafe_allow_html=True)
                     extracted = data.get("extracted_data", {})
                     
                     if extracted:
@@ -339,18 +356,18 @@ with tab1:
                     st.error(f"Error: {result.get('message', 'Error desconocido')}")
     
     with col2:
-        st.markdown("#### ▹ Guía rápida")
+        st.markdown('<h4><i class="fas fa-lightbulb icon-sm icon-warning"></i> Guía rápida</h4>', unsafe_allow_html=True)
         st.markdown("""
-        **1.** Define los campos a extraer en la barra lateral
+        **1.** <i class="fas fa-list-check icon-sm"></i> Define los campos a extraer en la barra lateral
         
-        **2.** Sube tu documento (PDF, CSV, Excel o texto)
+        **2.** <i class="fas fa-cloud-upload-alt icon-sm"></i> Sube tu documento (PDF, CSV, Excel o texto)
         
-        **3.** El sistema extraerá automáticamente los datos configurados
+        **3.** <i class="fas fa-magic icon-sm"></i> El sistema extraerá automáticamente los datos configurados
         
-        **4.** Exporta los resultados desde la pestaña Reportes
-        """)
+        **4.** <i class="fas fa-download icon-sm"></i> Exporta los resultados desde la pestaña Reportes
+        """, unsafe_allow_html=True)
         
-        st.markdown("#### ▹ Ejemplo de campos")
+        st.markdown('<h4><i class="fas fa-code icon-sm icon-muted"></i> Ejemplo de campos</h4>', unsafe_allow_html=True)
         st.code("""numero_factura: Número único
 fecha: Fecha de emisión  
 total: Importe total
@@ -361,7 +378,7 @@ proveedor: Nombre del emisor""", language=None)
 # TAB 2: HISTORIAL
 # ==================
 with tab2:
-    st.markdown("### ▸ Historial de procesos")
+    st.markdown('<h3><i class="fas fa-history icon-md icon-primary"></i> Historial de procesos</h3>', unsafe_allow_html=True)
     
     col_refresh, col_spacer = st.columns([1, 5])
     with col_refresh:
@@ -414,7 +431,7 @@ with tab2:
         )
         
         # Detalle de proceso seleccionado
-        st.markdown("#### ▹ Detalle del proceso")
+        st.markdown('<h4><i class="fas fa-info-circle icon-sm icon-primary"></i> Detalle del proceso</h4>', unsafe_allow_html=True)
         filenames = df['filename'].tolist() if 'filename' in df.columns else []
         selected = st.selectbox("Seleccionar proceso", filenames, label_visibility="collapsed")
         
@@ -436,12 +453,12 @@ with tab2:
 # TAB 3: REPORTES
 # ==================
 with tab3:
-    st.markdown("### ▸ Exportar datos")
+    st.markdown('<h3><i class="fas fa-file-export icon-md icon-primary"></i> Exportar datos</h3>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 2])
     
     with col1:
-        st.markdown("#### ▹ Formato de exportación")
+        st.markdown('<h4><i class="fas fa-file-archive icon-sm icon-muted"></i> Formato de exportación</h4>', unsafe_allow_html=True)
         
         report_format = st.radio(
             "Selecciona el formato",
@@ -479,7 +496,7 @@ with tab3:
                 st.error("No se pudo generar el reporte")
     
     with col2:
-        st.markdown("#### ▹ Vista previa")
+        st.markdown('<h4><i class="fas fa-eye icon-sm icon-muted"></i> Vista previa</h4>', unsafe_allow_html=True)
         
         processes_response = get_processes()
         processes = processes_response.get("data", {}).get("processes", [])
@@ -496,7 +513,8 @@ with tab3:
 st.divider()
 st.markdown(
     '<p style="text-align: center; color: #6c757d; font-size: 0.85rem;">'
-    'Document Processor · FastAPI + Streamlit'
+    '<i class="fas fa-code icon-sm"></i> Document Processor · '
+    '<i class="fab fa-python icon-sm"></i> FastAPI + Streamlit'
     '</p>',
     unsafe_allow_html=True
 )
