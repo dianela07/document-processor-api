@@ -23,7 +23,7 @@ class Process(Base):
     status = Column(String(50), default="pending")  # pending, processing, completed, error
     content_preview = Column(Text, nullable=True)
     extracted_data = Column(JSON, default=dict)
-    metadata = Column(JSON, default=dict)
+    file_metadata = Column(JSON, default=dict)  # Renamed from 'metadata' (reserved in SQLAlchemy)
     error_message = Column(Text, nullable=True)
     created_at = Column(DateTime, default=utc_now)
     processed_at = Column(DateTime, nullable=True)
@@ -36,7 +36,7 @@ class Process(Base):
             "status": self.status,
             "content_preview": self.content_preview,
             "extracted_data": self.extracted_data or {},
-            "metadata": self.metadata or {},
+            "metadata": self.file_metadata or {},  # Keep 'metadata' in API response for compatibility
             "error_message": self.error_message,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "processed_at": self.processed_at.isoformat() if self.processed_at else None

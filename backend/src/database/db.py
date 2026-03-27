@@ -75,7 +75,7 @@ class ProcessesDB:
                 status=response.get('status', 'completed'),
                 content_preview=response.get('content_preview'),
                 extracted_data=response.get('extracted_data', {}),
-                metadata=response.get('metadata', {}),
+                file_metadata=response.get('metadata', {}),
                 error_message=response.get('error_message'),
                 processed_at=datetime.fromisoformat(response['processed_at'].replace('Z', '+00:00')) 
                     if response.get('processed_at') else utc_now()
