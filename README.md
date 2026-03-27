@@ -55,7 +55,8 @@ document-processor-api/
 │       │   ├── config.py        # Configuración centralizada
 │       │   └── logging_config.py
 │       ├── database/
-│       │   └── db.py            # Persistencia JSON
+│       │   ├── db.py            # Repositorios SQLite
+│       │   └── models.py        # Modelos SQLAlchemy
 │       ├── extractor/
 │       │   └── extractor.py     # Extracción de contenido
 │       ├── llm/
@@ -71,6 +72,7 @@ document-processor-api/
 ├── frontend/
 │   └── app.py                   # Interfaz Streamlit
 ├── requirements.txt
+├── .env.example                 # Plantilla de configuración
 └── README.md
 ```
 
@@ -108,7 +110,13 @@ pip install -r requirements.txt
 
 ### 4. Configurar variables de entorno
 
-Crear archivo `.env` en la carpeta `backend/`:
+Copiar el archivo de ejemplo y configurar:
+
+```bash
+cp .env.example .env
+```
+
+Editar `.env` con tus credenciales:
 
 ```env
 # Proveedor LLM: "groq", "ollama", "azure", "none"
